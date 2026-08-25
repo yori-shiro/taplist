@@ -323,7 +323,12 @@ main{max-width:600px;margin:0 auto;padding:0 14px;}
 
 /* ================= constants ================= */
 var KEY = 'shopping-list-app';
+/* VERSION は保存データの形式。互換性の判定に使う（構造を変えたときだけ上げる）。
+   APP_VERSION はアプリ自体の版。表示専用で、動作には一切関与しない。
+   バグ報告を受けたときに、相手がどの版を使っているかを特定するためのもの。 */
 var VERSION = 1;
+var APP_VERSION = '1.0';
+var APP_DATE = '2026-08-25';
 var PRIORITIES = ['now','anytime','someday'];
 var P_LABEL = {now:'すぐ', anytime:'ついで', someday:'機会'};
 var P_FULL  = {now:'すぐ買う', anytime:'ついでに', someday:'機会があれば'};
@@ -832,6 +837,7 @@ function renderSettings(){
       'ホーム画面のアプリとはデータが別。</strong>'
     : '';
   el('about-note').innerHTML =
+    'かいものリスト v'+APP_VERSION+'（'+APP_DATE+'）<br>'+
     'アイテム '+state.items.length+' 件 / リスト '+state.list.length+' 件<br>'+
     'データ形式 v'+VERSION+'（この端末のブラウザ内にだけ保存される。端末をまたいだ同期はしない）'+ mode + stale;
 }
@@ -988,7 +994,12 @@ function stamp(){
   return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes());
 }
 function exportJSON(){
-  download('kaimono-'+stamp()+'.json', JSON.stringify(state, null, 2), 'application/json');
+  /* 書き出したJSONにアプリ版を残す。手元に届いたファイルから
+     どの版で作られたかを辿れるようにするため。読み込み時には使わない。 */
+  var out = clone(state);
+  out.appVersion = APP_VERSION;
+  out.exportedAt = nowISO();
+  download('kaimono-'+stamp()+'.json', JSON.stringify(out, null, 2), 'application/json');
 }
 function csvCell(v){
   var s = (v===null || v===undefined) ? '' : String(v);
