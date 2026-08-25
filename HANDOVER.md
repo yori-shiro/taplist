@@ -22,7 +22,8 @@
 
 ```
 index.html         本体。これ1つで動く（約50KB、アイコン埋め込み込み）
-README.md          利用者向け
+README.md          利用者向けの概要
+GUIDE.md           使い方ガイド（はじめて使う人向け）
 LICENSE            MIT
 DESIGN_NOTES.md    設計の記録
 TESTING.md         動作確認チェックシート
