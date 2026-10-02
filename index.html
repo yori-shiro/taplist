@@ -327,9 +327,14 @@ var KEY = 'shopping-list-app';
    APP_VERSION はアプリ自体の版。表示専用で、動作には一切関与しない。
    バグ報告を受けたときに、相手がどの版を使っているかを特定するためのもの。 */
 var VERSION = 1;
-var APP_VERSION = '1.0';
-var APP_DATE = '2026-08-25';
+var APP_VERSION = '1.1';
+var APP_DATE = '2026-10-02';
 var PRIORITIES = ['now','anytime','someday'];
+/* 新規にリストへ入れたときの優先度。
+   登録のきっかけは多くが「切らしそう」なので「すぐ」にする。
+   「ついで」は買いに行く理由（＝すぐ買うもの）があって初めて成り立つ状態なので、既定値には向かない。
+   バッジは PRIORITIES の順に巡回するため、ここから「すぐ→ついで→機会→すぐ」と押すほど下がる。 */
+var DEFAULT_PRIORITY = 'now';
 var P_LABEL = {now:'すぐ', anytime:'ついで', someday:'機会'};
 var P_FULL  = {now:'すぐ買う', anytime:'ついでに', someday:'機会があれば'};
 var UNCAT = '未分類';
@@ -463,7 +468,8 @@ function normalize(data){
     inList[l.itemId] = true;
     out.list.push({
       itemId: l.itemId,
-      /* 知らない優先度が入っていたら「ついで」に倒す */
+      /* 知らない優先度が入っていたら「ついで」に倒す。
+         既定値（すぐ）には合わせない。壊れたデータで緊急度を勝手に上げないため、控えめな側に倒す。 */
       priority: PRIORITIES.indexOf(l.priority) >= 0 ? l.priority : 'anytime',
       checked: !!l.checked,
       addedAt: (typeof l.addedAt === 'string' && l.addedAt) ? l.addedAt : nowISO()
@@ -582,7 +588,7 @@ function staleSession(){
 function addToList(itemId, priority){
   if(listEntry(itemId)) return;
   var next = clone(state);
-  next.list.push({itemId:itemId, priority:priority||'anytime', checked:false, addedAt:nowISO()});
+  next.list.push({itemId:itemId, priority:priority||DEFAULT_PRIORITY, checked:false, addedAt:nowISO()});
   commit(next);
 }
 function removeFromList(itemId){
@@ -620,7 +626,7 @@ function createItem(name, categoryId, addToListToo){
     purchaseCount:0, lastPurchasedAt:null
   });
   if(addToListToo){
-    next.list.push({itemId:id, priority:'anytime', checked:false, addedAt:nowISO()});
+    next.list.push({itemId:id, priority:DEFAULT_PRIORITY, checked:false, addedAt:nowISO()});
   }
   return commit(next) ? id : null;
 }
